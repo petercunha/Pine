@@ -2,6 +2,7 @@
 # import the necessary packages
 import numpy as np
 import pyautogui
+from termcolor import colored
 import imutils
 import time
 import mss
@@ -10,7 +11,14 @@ import os
 import signal
 import sys
 
-print("\nPine: Neural-Network Aimbot (v0.1)\n")
+print('''
+====================================
+ Pine: Neural-Network Aimbot (v0.1)
+====================================
+''')
+
+print("[INFO] press 'q' to quit or ctrl+C in console...")
+time.sleep(0.4)
 
 YOLO_DIRECTORY = "models"
 CONFIDENCE = 0.35
@@ -18,7 +26,7 @@ THRESHOLD = 0.2
 SCREENCAP_SIZE = 400
 
 # If true, mouse will be moved to target automatically
-ENABLE_MOUSE = False
+ENABLE_MOUSE = True
 
 # load the COCO class labels our YOLO model was trained on
 labelsPath = os.path.sep.join([YOLO_DIRECTORY, "coco-dataset.labels"])
@@ -52,7 +60,11 @@ origbox = (Wd/2 - SCREENCAP_SIZE/2, Hd/2 - SCREENCAP_SIZE/2,
            Wd/2 + SCREENCAP_SIZE/2, Hd/2 + SCREENCAP_SIZE/2)
 
 print("[INFO] screen access successful...")
-print("[INFO] press 'q' to quit or ctrl+C in console...")
+
+if not ENABLE_MOUSE:
+    print("[INFO] aim control disabled, using visualizer only...")
+else:
+    print(colored("[OKAY] Aimbot enabled!", "green"))
 
 
 def signal_handler(sig, frame):
@@ -65,6 +77,18 @@ def signal_handler(sig, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
+# print("[INFO] testing for GPU acceleration support...")
+build_info = str("".join(cv2.getBuildInformation().split()))
+
+if "OpenCL:YES" in build_info:
+    print(colored("[OKAY] OpenCL is working!", "green"))
+else:
+    print(colored("[WARNING] OpenCL acceleration is disabled!", "yellow"))
+
+if "CUDA:YES" in build_info:
+    print(colored("[OKAY] CUDA is working!", "green"))
+else:
+    print(colored("[WARNING] CUDA acceleration is disabled!", "yellow"))
 
 # loop over frames from the video file stream
 while True:
@@ -78,6 +102,8 @@ while True:
     # if the frame dimensions are empty, grab them
     if W is None or H is None:
         (H, W) = frame.shape[: 2]
+
+    frame = cv2.UMat(frame)
 
     # construct a blob from the input frame and then perform a forward
     # pass of the YOLO object detector, giving us our bounding boxes
