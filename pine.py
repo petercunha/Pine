@@ -7,6 +7,10 @@ import time
 import mss
 import cv2
 import os
+import signal
+import sys
+
+print("\nPine: Neural-Network Aimbot (v0.1)\n")
 
 YOLO_DIRECTORY = "models"
 CONFIDENCE = 0.35
@@ -31,21 +35,36 @@ configPath = os.path.sep.join([YOLO_DIRECTORY, "yolov3-tiny.cfg"])
 
 # load our YOLO object detector trained on COCO dataset (80 classes)
 # and determine only the *output* layer names that we need from YOLO
-print("[INFO] loading YOLO from disk...")
+print("[INFO] loading neural-network from disk...")
 net = cv2.dnn.readNetFromDarknet(configPath, weightsPath)
 ln = net.getLayerNames()
 ln = [ln[i[0] - 1] for i in net.getUnconnectedOutLayers()]
 
-# initialize the video stream and frame dimensions
-# vs = cv2.VideoCapture("videos/overwatch2.mp4")
-(W, H) = (None, None)
+print("[INFO] neural-network is loaded...")
 
 # screenshot tool
 sct = mss.mss()
 
+# define screen subspace
+W, H = None, None
 Wd, Hd = sct.monitors[1]["width"], sct.monitors[1]["height"]
 origbox = (Wd/2 - SCREENCAP_SIZE/2, Hd/2 - SCREENCAP_SIZE/2,
            Wd/2 + SCREENCAP_SIZE/2, Hd/2 + SCREENCAP_SIZE/2)
+
+print("[INFO] screen access successful...")
+print("[INFO] press 'q' to quit or ctrl+C in console...")
+
+
+def signal_handler(sig, frame):
+    # release the file pointers
+    print("\n[INFO] cleaning up...")
+    sct.close()
+    cv2.destroyAllWindows()
+    sys.exit(0)
+
+
+signal.signal(signal.SIGINT, signal_handler)
+
 
 # loop over frames from the video file stream
 while True:
@@ -137,10 +156,10 @@ while True:
             if ENABLE_MOUSE and bestMatch == confidences[i]:
                 pyautogui.moveTo(origbox[0] + x + w/2, origbox[1] + y + h/4)
 
-    cv2.imshow("Pine Vision", frame)
+    cv2.imshow("Pine", frame)
 
     elapsed = time.process_time() - start
-    print(int(elapsed * 1000), "ms")
+    # print(int(elapsed * 1000), "ms")
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
@@ -148,6 +167,5 @@ while True:
 
 # release the file pointers
 print("[INFO] cleaning up...")
-vs.release()
 sct.close()
 cv2.destroyAllWindows()
