@@ -7,4 +7,4 @@ print('''
 
 [INFO] press 'q' to quit or ctrl+C in console...''')
 
-pine.start(ENABLE_AIMBOT=False)
+pine.start(ENABLE_AIMBOT=True)

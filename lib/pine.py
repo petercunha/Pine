@@ -2,6 +2,7 @@
 import numpy as np
 import pyautogui
 from termcolor import colored
+import _thread
 import imutils
 import time
 import mss
@@ -12,6 +13,10 @@ import sys
 
 if __name__ == "__main__":
     print("Do not run this file directly.")
+
+
+def moveMouse(x, y):
+    pyautogui.moveTo(x, y)
 
 
 def start(ENABLE_AIMBOT):
@@ -49,45 +54,41 @@ def start(ENABLE_AIMBOT):
     # and determine only the *output* layer names that we need from YOLO
     print("[INFO] loading neural-network from disk...")
     net = cv2.dnn.readNetFromDarknet(configPath, weightsPath)
+    net.setPreferableBackend(cv2.dnn.DNN_BACKEND_DEFAULT)
+    net.setPreferableTarget(cv2.dnn.DNN_TARGET_OPENCL)
     ln = net.getLayerNames()
     ln = [ln[i[0] - 1] for i in net.getUnconnectedOutLayers()]
 
-    print("[INFO] neural-network is loaded...")
-
-    # screenshot tool
+    # Define screen capture area
+    print("[INFO] loading screencapture device...")
     sct = mss.mss()
-
-    # define screen subspace
     W, H = None, None
     Wd, Hd = sct.monitors[1]["width"], sct.monitors[1]["height"]
     origbox = (Wd/2 - ACTIVATION_RANGE/2, Hd/2 - ACTIVATION_RANGE/2,
                Wd/2 + ACTIVATION_RANGE/2, Hd/2 + ACTIVATION_RANGE/2)
 
-    print("[INFO] screen access successful...")
-
+    # Log whether aimbot is enabled
     if not ENABLE_AIMBOT:
-        print("[INFO] aim control disabled, using visualizer only...")
+        print("[INFO] aimbot disabled, using visualizer only...")
     else:
         print(colored("[OKAY] Aimbot enabled!", "green"))
 
+    # Handle Ctrl+C in terminal, release pointers
     def signal_handler(sig, frame):
         # release the file pointers
         print("\n[INFO] cleaning up...")
         sct.close()
         cv2.destroyAllWindows()
         sys.exit(0)
-
     signal.signal(signal.SIGINT, signal_handler)
 
-    # print("[INFO] testing for GPU acceleration support...")
+    # Test for GPU support
     build_info = str("".join(cv2.getBuildInformation().split()))
-
     if "OpenCL:YES" in build_info:
         print(colored("[OKAY] OpenCL is working!", "green"))
     else:
         print(
             colored("[WARNING] OpenCL acceleration is disabled!", "yellow"))
-
     if "CUDA:YES" in build_info:
         print(colored("[OKAY] CUDA is working!", "green"))
     else:
@@ -184,18 +185,18 @@ def start(ENABLE_AIMBOT):
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
                 if ENABLE_AIMBOT and bestMatch == confidences[i]:
-                    pyautogui.moveTo(
-                        origbox[0] + x + w/2, origbox[1] + y + h/4)
+                    mouseX = origbox[0] + x + w/2
+                    mouseY = origbox[1] + y + h/5
+                    # _thread.start_new_thread(moveMouse, (mouseX, mouseY))
+                    moveMouse(mouseX, mouseY)
 
         cv2.imshow("Pine", frame)
 
         elapsed = time.process_time() - start
-        # print(int(elapsed * 1000), "ms")
+        print(int(elapsed * 1000), "ms")
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-    # release the file pointers
-    print("[INFO] cleaning up...")
-    sct.close()
-    cv2.destroyAllWindows()
+    # Clean up on exit
+    signal_handler(0, 0)
