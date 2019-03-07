@@ -2,6 +2,7 @@
 import numpy as np
 import pyautogui
 from termcolor import colored
+import timeit
 import _thread
 import imutils
 import time
@@ -95,10 +96,11 @@ def start(ENABLE_AIMBOT):
         print(
             colored("[WARNING] CUDA acceleration is disabled!", "yellow"))
 
+    print()
+
     # loop over frames from the video file stream
     while True:
-
-        start = time.process_time()
+        start_time = timeit.default_timer()
 
         frame = np.array(sct.grab(origbox))
         frame = cv2.resize(frame, (ACTIVATION_RANGE, ACTIVATION_RANGE))
@@ -182,8 +184,26 @@ def start(ENABLE_AIMBOT):
                 # Detect closeness to target based on W and H of target
                 if abs(mouseX - currentMouseX) < w*2 and abs(mouseY - currentMouseY) < h*2:
                     skipRound = True
+
+                    cv2.circle(frame, (int(x + w/2), int(y + h/8)),
+                               5, (0, 0, 255), -1)
+
                     if abs(mouseX - currentMouseX) > w*0.5 or abs(mouseY - currentMouseY) > h*0.5:
                         moveMouse(mouseX, mouseY)
+
+                        cv2.rectangle(frame, (x, y), (x + w, y + h),
+                                      (0, 255, 0), 2)
+                        text = "TARGET ADJUST {}%".format(
+                            int(confidences[i]*100))
+                        cv2.putText(frame, text, (x, y - 5),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                    else:
+                        cv2.rectangle(frame, (x, y), (x + w, y + h),
+                                      (255, 0, 0), 2)
+                        text = "TARGET LOCK {}%".format(
+                            int(confidences[i]*100))
+                        cv2.putText(frame, text, (x, y - 5),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 
             # loop over the indexes we are keeping
             if not skipRound:
@@ -196,22 +216,22 @@ def start(ENABLE_AIMBOT):
                     color = [int(c) for c in COLORS[classIDs[i]]]
                     cv2.rectangle(frame, (x, y),
                                   (x + w, y + h), (0, 0, 255) if bestMatch == confidences[i] else color, 2)
-                    # text = "{}: {:.4f}".format(LABELS[classIDs[i]], confidences[i])
-                    text = "{}: {:.4f}".format("Player", confidences[i])
+
+                    text = "TARGET? {}%".format(int(confidences[i]*100))
                     cv2.putText(frame, text, (x, y - 5),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
                     if ENABLE_AIMBOT and bestMatch == confidences[i]:
                         mouseX = origbox[0] + x + w/2
                         mouseY = origbox[1] + y + h/8
-                        # _thread.start_new_thread(moveMouse, (mouseX, mouseY))
                         moveMouse(mouseX, mouseY)
 
-        # cv2.imshow("Pine", frame)
-        # out.write(frame)
+        cv2.imshow("Neural Net Vision (Pine)", frame)
 
-        elapsed = time.process_time() - start
-        print(int(elapsed * 1000), "ms")
+        elapsed = timeit.default_timer() - start_time
+        sys.stdout.write(
+            "\r{1} FPS with {0} MS interpolation delay \t".format(int(elapsed*1000), int(1/elapsed)))
+        sys.stdout.flush()
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break

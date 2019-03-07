@@ -1,4 +1,8 @@
 from lib import pine
+import os
+
+# Clear terminal
+os.system('cls' if os.name == 'nt' else 'clear')
 
 print('''
 ====================================
