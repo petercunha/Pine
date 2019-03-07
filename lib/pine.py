@@ -16,15 +16,15 @@ if __name__ == "__main__":
 
 
 def moveMouse(x, y):
-    pyautogui.moveTo(x, y)
+    pyautogui.moveTo(x, y, 0)
 
 
 def start(ENABLE_AIMBOT):
 
     # Config
     YOLO_DIRECTORY = "models"
-    CONFIDENCE = 0.35
-    THRESHOLD = 0.2
+    CONFIDENCE = 0.36
+    THRESHOLD = 0.22
 
     #
     #   Size (in pixels) of the screen capture box to feed the neural net.
@@ -32,7 +32,7 @@ def start(ENABLE_AIMBOT):
     #
     #   Example: "ACTIVATION_RANGE = 400" means a 400x400 pixel box.
     #
-    ACTIVATION_RANGE = 400
+    ACTIVATION_RANGE = 335
 
     # load the COCO class labels our YOLO model was trained on
     labelsPath = os.path.sep.join([YOLO_DIRECTORY, "coco-dataset.labels"])
@@ -168,29 +168,47 @@ def start(ENABLE_AIMBOT):
 
             # Find best player match
             bestMatch = confidences[np.argmax(confidences)]
+            skipRound = False
 
-            # loop over the indexes we are keeping
+            # Check if the mouse is already on a target
             for i in idxs.flatten():
                 # extract the bounding box coordinates
                 (x, y) = (boxes[i][0], boxes[i][1])
                 (w, h) = (boxes[i][2], boxes[i][3])
 
-                # draw a bounding box rectangle and label on the frame
-                color = [int(c) for c in COLORS[classIDs[i]]]
-                cv2.rectangle(frame, (x, y),
-                              (x + w, y + h), (0, 0, 255) if bestMatch == confidences[i] else color, 2)
-                # text = "{}: {:.4f}".format(LABELS[classIDs[i]], confidences[i])
-                text = "{}: {:.4f}".format("Player", confidences[i])
-                cv2.putText(frame, text, (x, y - 5),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                mouseX, mouseY = (origbox[0] + x + w/2, origbox[1] + y + h/8)
+                currentMouseX, currentMouseY = pyautogui.position()
 
-                if ENABLE_AIMBOT and bestMatch == confidences[i]:
-                    mouseX = origbox[0] + x + w/2
-                    mouseY = origbox[1] + y + h/5
-                    # _thread.start_new_thread(moveMouse, (mouseX, mouseY))
-                    moveMouse(mouseX, mouseY)
+                # Detect closeness to target based on W and H of target
+                if abs(mouseX - currentMouseX) < w*2 and abs(mouseY - currentMouseY) < h*2:
+                    skipRound = True
+                    if abs(mouseX - currentMouseX) > w*0.5 or abs(mouseY - currentMouseY) > h*0.5:
+                        moveMouse(mouseX, mouseY)
 
-        cv2.imshow("Pine", frame)
+            # loop over the indexes we are keeping
+            if not skipRound:
+                for i in idxs.flatten():
+                    # extract the bounding box coordinates
+                    (x, y) = (boxes[i][0], boxes[i][1])
+                    (w, h) = (boxes[i][2], boxes[i][3])
+
+                    # draw a bounding box rectangle and label on the frame
+                    color = [int(c) for c in COLORS[classIDs[i]]]
+                    cv2.rectangle(frame, (x, y),
+                                  (x + w, y + h), (0, 0, 255) if bestMatch == confidences[i] else color, 2)
+                    # text = "{}: {:.4f}".format(LABELS[classIDs[i]], confidences[i])
+                    text = "{}: {:.4f}".format("Player", confidences[i])
+                    cv2.putText(frame, text, (x, y - 5),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+
+                    if ENABLE_AIMBOT and bestMatch == confidences[i]:
+                        mouseX = origbox[0] + x + w/2
+                        mouseY = origbox[1] + y + h/8
+                        # _thread.start_new_thread(moveMouse, (mouseX, mouseY))
+                        moveMouse(mouseX, mouseY)
+
+        # cv2.imshow("Pine", frame)
+        # out.write(frame)
 
         elapsed = time.process_time() - start
         print(int(elapsed * 1000), "ms")
