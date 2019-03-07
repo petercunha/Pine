@@ -8,7 +8,7 @@ This software can be tweaked to work smoothly in CS:GO, Fortnite, and Overwatch.
 
 Well, neural network aimbots are great for a lot of reasons... Probably most importantly, they never access the memory of the game, so they are practically invisible to "Anti-Cheat" sofware. Additionally, they can abstract their capabilities to many different games without code modifications. The only issue:
 
-Neural Network Aimbots have always had one big problem: their target detection is okay, but their inference time is *terrible*. Even HAAR Cascades were a bad fit, since they have fast detection but horrible accuracy. RetinaNet is a joke for real-time detection, and MobileNetSSD, Faster R-CNN were *sorta ok* if you had a Nvidia Titan X with CUDA drivers. But let's be honest, who the hell can afford a Titan?
+Neural Network Aimbots have always had one big problem: their target detection is okay, but their inference time is *terrible*. Even HAAR Cascades are a bad fit, since they have decent speed but horrible accuracy. MobileNetSSD and Faster R-CNN were *sorta ok* if you had a Nvidia Titan X with CUDA drivers. But let's be honest, who the hell can afford a Titan?
 
 Enter YOLOv3, tiny edition. Detection scores are decent, and inference times are... *WHAT? **220 FPS WITH A 33% mAP?!*** For reference of how absolutely insane this is, SSD513 gets about 8 FPS with 50% mAP.
 
