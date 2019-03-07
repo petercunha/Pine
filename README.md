@@ -4,6 +4,21 @@ Pine is an aimbot powered by real-time object detection with neural networks.
 This software can be tweaked to work smoothly in CS:GO, Fortnite, and Overwatch. Pine also has built-in support for Nvidia's CUDA toolkit and is optimized to achieve extremely high object-detection FPS. It is GPU accelerated, cross-platform, and blazingly fast.
 
 
+### Why Neural Networks?
+
+Well, neural network aimbots are great for a lot of reasons... Probably most importantly, they never access the memory of the game, so they are practically invisible to "Anti-Cheat" sofware. Additionally, they can abstract their capabilities to many different games without code modifications. The only issue:
+
+Neural Network Aimbots have always had one big problem: their target detection is okay, but their inference time is *terrible*. Even HAAR Cascades were a bad fit, since they have fast detection but horrible accuracy. RetinaNet is a joke for real-time detection, and MobileNetSSD, Faster R-CNN were *sorta ok* if you had a Nvidia Titan X with CUDA drivers. But let's be honest, who the hell can afford a Titan?
+
+Enter YOLOv3, tiny edition. Detection scores are decent, and inference times are... *WHAT? **220 FPS WITH A 33% mAP?!*** For reference of how absolutely insane this is, SSD513 gets about 8 FPS with 50% mAP.
+
+
+![YOLO Network Speed Graph](https://pjreddie.com/media/image/map50blue.png)
+
+
+Finally, a real-time object-detection network that will run on my dinky AMD M370X from 2015! This network is what inspired me to build Pine.
+
+
 
 ## Architecture
 
@@ -14,8 +29,6 @@ At its core, Pine's internal object detection system relies on a modified versio
 ![YOLO Neural Network](https://i.imgur.com/0edTFBP.jpg)
 
 YOLO's inference time puts RetinaNet to shame...
-
-![YOLO Network Speed Graph](https://pjreddie.com/media/image/map50blue.png)
 
 
 ### OpenCV: GPU-Enabled Image Processing
