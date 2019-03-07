@@ -1,7 +1,7 @@
 # Pine
 Pine is an aimbot powered by real-time object detection with neural networks.
 
-This software can be tweaked to work smoothly in CS:GO, Fortnite, and Overwatch. Pine also has built-in support for Nvidia's CUDA toolkit and is optimized to achieve extremely high object-detection FPS. GPU accelerated, cross-platform, and blazingly fast.
+This software can be tweaked to work smoothly in CS:GO, Fortnite, and Overwatch. Pine also has built-in support for Nvidia's CUDA toolkit and is optimized to achieve extremely high object-detection FPS. It is GPU accelerated, cross-platform, and blazingly fast.
 
 
 
