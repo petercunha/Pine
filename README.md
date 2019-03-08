@@ -3,6 +3,11 @@ Pine is an aimbot powered by real-time object detection with neural networks.
 
 This software can be tweaked to work smoothly in CS:GO, Fortnite, and Overwatch. Pine also has built-in support for Nvidia's CUDA toolkit and is optimized to achieve extremely high object-detection FPS. It is GPU accelerated, cross-platform, and blazingly fast.
 
+Here's a demo gif: *(Sorry for the shitty framerate. My potato mac can't run CS:GO, screen record, and Pine at the same time.)*
+![Pine Demo GIF](/demo/demo.gif)
+
+I will upload a more extensive demo video pretty soon.
+
 
 ### How do I run it?
 - Install OpenCV with Python3 bindings
@@ -27,7 +32,7 @@ Neural Network Aimbots have always had one big problem: their target detection i
 Enter YOLOv3, tiny edition. Detection scores are decent, and inference times are... *WHAT? **220 FPS WITH A 33% mAP?!*** For reference of how absolutely insane this is, SSD513 gets about 8 FPS with 50% mAP.
 
 
-![YOLO Network Speed Graph](https://pjreddie.com/media/image/map50blue.png)
+![YOLO Network Speed Graph](https://i.imgur.com/NrGZOYt.png)
 
 
 Finally, a real-time object-detection network that will run on my dinky AMD M370X from 2015! This network is what inspired me to build Pine.
