@@ -65,8 +65,10 @@ def start(ENABLE_AIMBOT):
     sct = mss.mss()
     W, H = None, None
     Wd, Hd = sct.monitors[1]["width"], sct.monitors[1]["height"]
-    origbox = (Wd/2 - ACTIVATION_RANGE/2, Hd/2 - ACTIVATION_RANGE/2,
-               Wd/2 + ACTIVATION_RANGE/2, Hd/2 + ACTIVATION_RANGE/2)
+    origbox = (int(Wd/2 - ACTIVATION_RANGE/2), 
+               int(Hd/2 - ACTIVATION_RANGE/2),
+               int(Wd/2 + ACTIVATION_RANGE/2), 
+               int(Hd/2 + ACTIVATION_RANGE/2))
 
     # Log whether aimbot is enabled
     if not ENABLE_AIMBOT:
@@ -85,7 +87,9 @@ def start(ENABLE_AIMBOT):
 
     # Test for GPU support
     build_info = str("".join(cv2.getBuildInformation().split()))
-    if "OpenCL:YES" in build_info:
+    if cv2.ocl.haveOpenCL():
+        cv2.ocl.setUseOpenCL(True)
+        cv2.ocl.useOpenCL()
         print(colored("[OKAY] OpenCL is working!", "green"))
     else:
         print(
