@@ -290,10 +290,6 @@ def start(ENABLE_AIMBOT):
         sys.stdout.write(
             "\r{1} FPS with {0} MS interpolation delay \t".format(int(elapsed*1000), int(1/elapsed)))
         sys.stdout.flush()
-        if keyboard1.is_pressed('p'):
-            print("Paused")
-            keyboard1.wait('p')
-            print("Resumed")
         if cv2.waitKey(1) & 0xFF == ord('0'):
             break
 
