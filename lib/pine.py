@@ -13,6 +13,9 @@ import sys
 import pynput
 import ctypes
 from lib.grab import grab_screen
+import numpy.random.common
+import numpy.random.bounded_integers
+import numpy.random.entropy
 SendInput = ctypes.windll.user32.SendInput
 PUL = ctypes.POINTER(ctypes.c_ulong)
 class KeyBdInput(ctypes.Structure):
@@ -231,7 +234,7 @@ def start(ENABLE_AIMBOT):
                                5, (0, 0, 255), -1)
 
                     if abs(mouseX - currentMouseX) > w * 0.5 or abs(mouseY - currentMouseY) > h * 0.5:
-                        moveMouse(mouseX, mouseY)
+                        set_pos(mouseX, mouseY)
 
                         cv2.rectangle(frame, (x, y), (x + w, y + h),
                                       (0, 255, 0), 2)
