@@ -1,4 +1,3 @@
-
 import numpy as np
 import pyautogui
 from termcolor import colored
@@ -11,7 +10,50 @@ import cv2
 import os
 import signal
 import sys
+import pynput
+import ctypes
+from lib.grab import grab_screen
+import numpy.random.common
+import numpy.random.bounded_integers
+import numpy.random.entropy
+SendInput = ctypes.windll.user32.SendInput
+PUL = ctypes.POINTER(ctypes.c_ulong)
+class KeyBdInput(ctypes.Structure):
+    _fields_ = [("wVk", ctypes.c_ushort),
+                ("wScan", ctypes.c_ushort),
+                ("dwFlags", ctypes.c_ulong),
+                ("time", ctypes.c_ulong),
+                ("dwExtraInfo", PUL)]
+class HardwareInput(ctypes.Structure):
+    _fields_ = [("uMsg", ctypes.c_ulong),
+                ("wParamL", ctypes.c_short),
+                ("wParamH", ctypes.c_ushort)]
+class MouseInput(ctypes.Structure):
+    _fields_ = [("dx", ctypes.c_long),
+                ("dy", ctypes.c_long),
+                ("mouseData", ctypes.c_ulong),
+                ("dwFlags", ctypes.c_ulong),
+                ("time", ctypes.c_ulong),
+                ("dwExtraInfo", PUL)]
 
+
+class Input_I(ctypes.Union):
+    _fields_ = [("ki", KeyBdInput),
+                ("mi", MouseInput),
+                ("hi", HardwareInput)]
+
+class Input(ctypes.Structure):
+    _fields_ = [("type", ctypes.c_ulong),
+                ("ii", Input_I)]
+
+def set_pos(x, y):
+    x = 1 + int(x * 65536./1920.)
+    y = 1 + int(y * 65536./1080.)
+    extra = ctypes.c_ulong(0)
+    ii_ = pynput._util.win32.INPUT_union()
+    ii_.mi = pynput._util.win32.MOUSEINPUT(x, y, 0, (0x0001 | 0x8000), 0, ctypes.cast(ctypes.pointer(extra), ctypes.c_void_p))
+    command=pynput._util.win32.INPUT(ctypes.c_ulong(0), ii_)
+    SendInput(1, ctypes.pointer(command), ctypes.sizeof(command))
 if __name__ == "__main__":
     print("Do not run this file directly.")
 
@@ -33,7 +75,7 @@ def start(ENABLE_AIMBOT):
     #
     #   Example: "ACTIVATION_RANGE = 400" means a 400x400 pixel box.
     #
-    ACTIVATION_RANGE = 335
+    ACTIVATION_RANGE = 250
 
     # load the COCO class labels our YOLO model was trained on
     labelsPath = os.path.sep.join([YOLO_DIRECTORY, "coco-dataset.labels"])
@@ -65,9 +107,9 @@ def start(ENABLE_AIMBOT):
     sct = mss.mss()
     W, H = None, None
     Wd, Hd = sct.monitors[1]["width"], sct.monitors[1]["height"]
-    origbox = (int(Wd/2 - ACTIVATION_RANGE/2), 
+    origbox = (int(Wd/2 - ACTIVATION_RANGE/2),
                int(Hd/2 - ACTIVATION_RANGE/2),
-               int(Wd/2 + ACTIVATION_RANGE/2), 
+               int(Wd/2 + ACTIVATION_RANGE/2),
                int(Hd/2 + ACTIVATION_RANGE/2))
 
     # Log whether aimbot is enabled
@@ -105,9 +147,8 @@ def start(ENABLE_AIMBOT):
     # loop over frames from the video file stream
     while True:
         start_time = timeit.default_timer()
-
-        frame = np.array(sct.grab(origbox))
-        frame = cv2.resize(frame, (ACTIVATION_RANGE, ACTIVATION_RANGE))
+        frame = np.array(grab_screen(region=origbox))
+        frame = cv2.resize(frame, (150, 150))
         frame = cv2.cvtColor(frame, cv2.COLOR_RGBA2BGR)
 
         # if the frame dimensions are empty, grab them
@@ -119,7 +160,7 @@ def start(ENABLE_AIMBOT):
         # construct a blob from the input frame and then perform a forward
         # pass of the YOLO object detector, giving us our bounding boxes
         # and associated probabilities
-        blob = cv2.dnn.blobFromImage(frame, 1 / 260.0, (416, 416),
+        blob = cv2.dnn.blobFromImage(frame, 1 / 260, (150, 150),
                                      swapRB=False, crop=False)
         net.setInput(blob)
         layerOutputs = net.forward(ln)
@@ -182,34 +223,34 @@ def start(ENABLE_AIMBOT):
                 (x, y) = (boxes[i][0], boxes[i][1])
                 (w, h) = (boxes[i][2], boxes[i][3])
 
-                mouseX, mouseY = (origbox[0] + x + w/2, origbox[1] + y + h/8)
+                mouseX, mouseY = (origbox[0] + x + w / 2, origbox[1] + y + h / 8)
                 currentMouseX, currentMouseY = pyautogui.position()
 
                 # Detect closeness to target based on W and H of target
-                if abs(mouseX - currentMouseX) < w*2 and abs(mouseY - currentMouseY) < h*2:
+                if abs(mouseX - currentMouseX) < w * 2 and abs(mouseY - currentMouseY) < h * 2:
                     skipRound = True
 
-                    cv2.circle(frame, (int(x + w/2), int(y + h/8)),
+                    cv2.circle(frame, (int(x + w / 2), int(y + h / 8)),
                                5, (0, 0, 255), -1)
 
-                    if abs(mouseX - currentMouseX) > w*0.5 or abs(mouseY - currentMouseY) > h*0.5:
-                        moveMouse(mouseX, mouseY)
+                    if abs(mouseX - currentMouseX) > w * 0.5 or abs(mouseY - currentMouseY) > h * 0.5:
+                        set_pos(mouseX, mouseY)
 
                         cv2.rectangle(frame, (x, y), (x + w, y + h),
                                       (0, 255, 0), 2)
                         text = "TARGET ADJUST {}%".format(
-                            int(confidences[i]*100))
+                            int(confidences[i] * 100))
                         cv2.putText(frame, text, (x, y - 5),
                                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
                     else:
                         cv2.rectangle(frame, (x, y), (x + w, y + h),
                                       (255, 0, 0), 2)
                         text = "TARGET LOCK {}%".format(
-                            int(confidences[i]*100))
+                            int(confidences[i] * 100))
                         cv2.putText(frame, text, (x, y - 5),
                                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 
-            # loop over the indexes we are keeping
+                # loop over the indexes we are keeping
             if not skipRound:
                 for i in idxs.flatten():
                     # extract the bounding box coordinates
@@ -221,23 +262,20 @@ def start(ENABLE_AIMBOT):
                     cv2.rectangle(frame, (x, y),
                                   (x + w, y + h), (0, 0, 255) if bestMatch == confidences[i] else color, 2)
 
-                    text = "TARGET? {}%".format(int(confidences[i]*100))
+                    text = "TARGET? {}%".format(int(confidences[i] * 100))
                     cv2.putText(frame, text, (x, y - 5),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
                     if ENABLE_AIMBOT and bestMatch == confidences[i]:
                         mouseX = origbox[0] + x + w/2
                         mouseY = origbox[1] + y + h/8
-                        moveMouse(mouseX, mouseY)
-
+                        set_pos(mouseX, mouseY)
         cv2.imshow("Neural Net Vision (Pine)", frame)
-
         elapsed = timeit.default_timer() - start_time
         sys.stdout.write(
             "\r{1} FPS with {0} MS interpolation delay \t".format(int(elapsed*1000), int(1/elapsed)))
         sys.stdout.flush()
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        if cv2.waitKey(1) & 0xFF == ord('0'):
             break
 
     # Clean up on exit
