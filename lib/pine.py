@@ -13,11 +13,12 @@ import sys
 import pynput
 import ctypes
 from lib.grab import grab_screen
-import numpy.random.common
-import numpy.random.bounded_integers
-import numpy.random.entropy
+
+sct = mss.mss()
+Wd, Hd = sct.monitors[1]["width"], sct.monitors[1]["height"]
 SendInput = ctypes.windll.user32.SendInput
 PUL = ctypes.POINTER(ctypes.c_ulong)
+
 class KeyBdInput(ctypes.Structure):
     _fields_ = [("wVk", ctypes.c_ushort),
                 ("wScan", ctypes.c_ushort),
@@ -35,20 +36,17 @@ class MouseInput(ctypes.Structure):
                 ("dwFlags", ctypes.c_ulong),
                 ("time", ctypes.c_ulong),
                 ("dwExtraInfo", PUL)]
-
-
 class Input_I(ctypes.Union):
     _fields_ = [("ki", KeyBdInput),
                 ("mi", MouseInput),
                 ("hi", HardwareInput)]
-
 class Input(ctypes.Structure):
     _fields_ = [("type", ctypes.c_ulong),
                 ("ii", Input_I)]
 
 def set_pos(x, y):
-    x = 1 + int(x * 65536./1920.)
-    y = 1 + int(y * 65536./1080.)
+    x = 1 + int(x * 65536./Wd)
+    y = 1 + int(y * 65536./Hd)
     extra = ctypes.c_ulong(0)
     ii_ = pynput._util.win32.INPUT_union()
     ii_.mi = pynput._util.win32.MOUSEINPUT(x, y, 0, (0x0001 | 0x8000), 0, ctypes.cast(ctypes.pointer(extra), ctypes.c_void_p))
@@ -56,11 +54,6 @@ def set_pos(x, y):
     SendInput(1, ctypes.pointer(command), ctypes.sizeof(command))
 if __name__ == "__main__":
     print("Do not run this file directly.")
-
-
-def moveMouse(x, y):
-    pyautogui.moveTo(x, y, 0)
-
 
 def start(ENABLE_AIMBOT):
 
@@ -104,9 +97,7 @@ def start(ENABLE_AIMBOT):
 
     # Define screen capture area
     print("[INFO] loading screencapture device...")
-    sct = mss.mss()
     W, H = None, None
-    Wd, Hd = sct.monitors[1]["width"], sct.monitors[1]["height"]
     origbox = (int(Wd/2 - ACTIVATION_RANGE/2),
                int(Hd/2 - ACTIVATION_RANGE/2),
                int(Wd/2 + ACTIVATION_RANGE/2),
@@ -215,61 +206,30 @@ def start(ENABLE_AIMBOT):
 
             # Find best player match
             bestMatch = confidences[np.argmax(confidences)]
-            skipRound = False
 
-            # Check if the mouse is already on a target
+            # loop over the indexes we are keeping
             for i in idxs.flatten():
                 # extract the bounding box coordinates
                 (x, y) = (boxes[i][0], boxes[i][1])
                 (w, h) = (boxes[i][2], boxes[i][3])
 
-                mouseX, mouseY = (origbox[0] + x + w / 2, origbox[1] + y + h / 8)
-                currentMouseX, currentMouseY = pyautogui.position()
+                # draw target dot on the frame
+                cv2.circle(frame, (int(x + w / 2), int(y + h / 5)), 5, (0, 0, 255), -1)
 
-                # Detect closeness to target based on W and H of target
-                if abs(mouseX - currentMouseX) < w * 2 and abs(mouseY - currentMouseY) < h * 2:
-                    skipRound = True
+                # draw a bounding box rectangle and label on the frame
+                color = [int(c) for c in COLORS[classIDs[i]]]
+                cv2.rectangle(frame, (x, y),
+                                (x + w, y + h), (0, 0, 255) if bestMatch == confidences[i] else color, 2)
 
-                    cv2.circle(frame, (int(x + w / 2), int(y + h / 8)),
-                               5, (0, 0, 255), -1)
+                text = "TARGET {}%".format(int(confidences[i] * 100))
+                cv2.putText(frame, text, (x, y - 5),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-                    if abs(mouseX - currentMouseX) > w * 0.5 or abs(mouseY - currentMouseY) > h * 0.5:
-                        set_pos(mouseX, mouseY)
+                if ENABLE_AIMBOT and bestMatch == confidences[i]:
+                    mouseX = origbox[0] + (x + w) * ACTIVATION_RANGE/150
+                    mouseY = origbox[1] + (y + h/5) * ACTIVATION_RANGE/150
+                    set_pos(mouseX, mouseY)
 
-                        cv2.rectangle(frame, (x, y), (x + w, y + h),
-                                      (0, 255, 0), 2)
-                        text = "TARGET ADJUST {}%".format(
-                            int(confidences[i] * 100))
-                        cv2.putText(frame, text, (x, y - 5),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-                    else:
-                        cv2.rectangle(frame, (x, y), (x + w, y + h),
-                                      (255, 0, 0), 2)
-                        text = "TARGET LOCK {}%".format(
-                            int(confidences[i] * 100))
-                        cv2.putText(frame, text, (x, y - 5),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-
-                # loop over the indexes we are keeping
-            if not skipRound:
-                for i in idxs.flatten():
-                    # extract the bounding box coordinates
-                    (x, y) = (boxes[i][0], boxes[i][1])
-                    (w, h) = (boxes[i][2], boxes[i][3])
-
-                    # draw a bounding box rectangle and label on the frame
-                    color = [int(c) for c in COLORS[classIDs[i]]]
-                    cv2.rectangle(frame, (x, y),
-                                  (x + w, y + h), (0, 0, 255) if bestMatch == confidences[i] else color, 2)
-
-                    text = "TARGET? {}%".format(int(confidences[i] * 100))
-                    cv2.putText(frame, text, (x, y - 5),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-
-                    if ENABLE_AIMBOT and bestMatch == confidences[i]:
-                        mouseX = origbox[0] + x + w/2
-                        mouseY = origbox[1] + y + h/8
-                        set_pos(mouseX, mouseY)
         cv2.imshow("Neural Net Vision (Pine)", frame)
         elapsed = timeit.default_timer() - start_time
         sys.stdout.write(
