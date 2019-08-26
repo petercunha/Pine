@@ -1,5 +1,4 @@
 import numpy as np
-import pyautogui
 from termcolor import colored
 import timeit
 import _thread
@@ -139,7 +138,6 @@ def start(ENABLE_AIMBOT):
     while True:
         start_time = timeit.default_timer()
         frame = np.array(grab_screen(region=origbox))
-        frame = cv2.resize(frame, (150, 150))
         frame = cv2.cvtColor(frame, cv2.COLOR_RGBA2BGR)
 
         # if the frame dimensions are empty, grab them
@@ -217,17 +215,17 @@ def start(ENABLE_AIMBOT):
                 cv2.circle(frame, (int(x + w / 2), int(y + h / 5)), 5, (0, 0, 255), -1)
 
                 # draw a bounding box rectangle and label on the frame
-                color = [int(c) for c in COLORS[classIDs[i]]]
+                # color = [int(c) for c in COLORS[classIDs[i]]]
                 cv2.rectangle(frame, (x, y),
-                                (x + w, y + h), (0, 0, 255) if bestMatch == confidences[i] else color, 2)
+                                (x + w, y + h), (0, 0, 255), 2)
 
                 text = "TARGET {}%".format(int(confidences[i] * 100))
                 cv2.putText(frame, text, (x, y - 5),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
                 if ENABLE_AIMBOT and bestMatch == confidences[i]:
-                    mouseX = origbox[0] + (x + w) * ACTIVATION_RANGE/150
-                    mouseY = origbox[1] + (y + h/5) * ACTIVATION_RANGE/150
+                    mouseX = origbox[0] + (x + w/1.5)
+                    mouseY = origbox[1] + (y + h/5)
                     set_pos(mouseX, mouseY)
 
         cv2.imshow("Neural Net Vision (Pine)", frame)
