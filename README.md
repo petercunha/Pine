@@ -15,6 +15,7 @@ I will upload a more extensive demo video pretty soon.
 ## Installation
 - Install OpenCV with Python3 bindings
 - Install any missing dependencies with Pip
+- Install the [pywin32](https://sourceforge.net/projects/pywin32), the Windows API bindings for Python.
 - Install the Nvidia CUDA toolkit if you have a compatible GPU
   - If you don't have an Nvidia GPU, Pine will try to use OpenCL instead of CUDA
 - Then run the program with Python3.
