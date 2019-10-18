@@ -57,3 +57,8 @@ At its core, Pine's internal object detection system relies on a modified versio
 OpenCV is at the heart of Pine's image processing capabilities. Not only does it provide an abstraction layer for working with the screen capture data, but it it also allows us to harness the power of GPU hardware by interfacing CUDA and OpenCL. After Pine takes a capture of the user's screen, it uses OpenCV to process that image into a form that is recognizable to the object-detection engine.
 
 ![OpenCV Image Processing Architecture](https://i.imgur.com/n3LgS6T.png)
+
+## Special Thanks
+Thanks to everyone who made this project possible. I'd like to give special shoutouts to the following people:
+ - @AutisticDragon for his contributions to the codebase. He leveraged native Windows APIs to improve the performance of Pine by up to 300%.
+ - Adrian Rosebrock, PhD, for his invaluable resources on machine learning. Check out his blog: [PyImageSearch](https://www.pyimagesearch.com)
