@@ -18,6 +18,7 @@ I will upload a more extensive demo video pretty soon.
 - Install [pywin32](https://sourceforge.net/projects/pywin32), the Windows API bindings for Python.
 - Install the Nvidia CUDA toolkit if you have a compatible GPU
   - If you don't have an Nvidia GPU, Pine will try to use OpenCL instead of CUDA
+- Also for acurate long Quick Mouse Movements please Disable Mouse acceleration. Thanks!
 - Then run the program with Python3.
  
  `$ python3 pine.py`
