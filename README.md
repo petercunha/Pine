@@ -5,11 +5,9 @@ This software can be tweaked to work smoothly in CS:GO, Fortnite, and Overwatch.
 
 
 ## Demo
-*Terrible FPS because my potato mac can't run CS:GO, Pine, and screen record at the same time. :'-)*
+Demo video: https://www.youtube.com/watch?v=HB4HA29aOcc
 
-![Pine Demo GIF](/demo/demo.gif)
-
-I will upload a more extensive demo video pretty soon.
+![Pine Demo GIF](/demo/demo.gif)=
 
 
 ## Installation
