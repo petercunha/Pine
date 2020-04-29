@@ -5,9 +5,9 @@ This software can be tweaked to work smoothly in CS:GO, Fortnite, and Overwatch.
 
 
 ## Demo
-Demo video: https://www.youtube.com/watch?v=HB4HA29aOcc
+[Demo video](https://www.youtube.com/watch?v=HB4HA29aOcc)
 
-![Pine Demo GIF](/demo/demo.gif)=
+[![Pine Demo GIF](/demo/demo.gif)=](https://www.youtube.com/watch?v=HB4HA29aOcc)
 
 
 ## Installation
