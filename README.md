@@ -60,4 +60,4 @@ OpenCV is at the heart of Pine's image processing capabilities. Not only does it
 ## Special Thanks
 Thanks to everyone who made this project possible. I'd like to give special shoutouts to the following people:
  - [AutisticDragon](https://github.com/FidgetySo) for his contributions to the codebase. He leveraged native Windows APIs to improve the performance of Pine by up to 300%.
- - Adrian Rosebrock, PhD, for his invaluable resources on machine learning. Check out his blog: [PyImageSearch](https://www.pyimagesearch.com)
+ - Adrian Rosebrock, PhD, for his invaluable resources on machine learning. Check out his blog: [PyImageSearch](https://www.pyimagesearch.com/2018/11/12/yolo-object-detection-with-opencv/)
