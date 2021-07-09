@@ -11,17 +11,15 @@ This software can be tweaked to work smoothly in CS:GO, Fortnite, and Overwatch.
 
 
 ## Installation
-- Install OpenCV with Python3 bindings
-- Install any missing dependencies with Pip
-- Install [pywin32](https://sourceforge.net/projects/pywin32), the Windows API bindings for Python.
+- Install all requirements with `pip install -r requirements.txt`
 - Install the Nvidia CUDA toolkit if you have a compatible GPU
   - If you don't have an Nvidia GPU, Pine will try to use OpenCL instead of CUDA
 - Also for acurate long Quick Mouse Movements please Disable Mouse acceleration. Thanks!
 - Then run the program with Python3.
- 
+
  `$ python3 pine.py`
- 
- 
+
+
  ### What games does it work with?
 This release is currently optimized for CS:GO, but I plan adding more game configs in the future
 
